@@ -12,4 +12,8 @@ export class CatsService {
   findAll(): Cat[] {
     return this.cats;
   }
+
+  findOne(id: number): string {
+    return `This action returns a #${id} cat`;
+  }
 }

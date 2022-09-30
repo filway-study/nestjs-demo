@@ -9,8 +9,14 @@ import {
   Body,
   Res,
   HttpStatus,
+  HttpException,
+  UnauthorizedException,
+  UseFilters,
+  ForbiddenException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { HttpExceptionFilter } from 'src/http-exception.filter';
 import { CatsService } from './cats.service';
 import { CreateCatDto } from './dto';
 import { Cat } from './interfaces/cat.interface';
@@ -21,11 +27,13 @@ export class CatsController {
 
   @Get()
   async findAll(): Promise<Cat[]> {
+    throw new UnauthorizedException('This is a custom message');
     return this.catsService.findAll();
   }
 
   @Post()
   create(@Body() createCatDto: CreateCatDto) {
+    throw new ForbiddenException();
     this.catsService.create(createCatDto);
   }
 
@@ -43,8 +51,14 @@ export class CatsController {
   }
 
   @Get(':id')
-  findOne(@Param() params): string {
-    console.log(params.id);
-    return `This action returns a #${params.id} cat`;
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+  ): string {
+    console.log(id);
+    return this.catsService.findOne(id);
   }
 }
